@@ -103,3 +103,21 @@ class TDClient(object):
                             headers=self._headers(),
                             params={'direction': direction,
                                     'change_type': change_type})
+
+    def positions(self):
+        ret = {}
+        if self.accountIds:
+            for acc in self.accountIds:
+                resp = requests.get(ACCOUNTS + str(acc) + '?fields=positions', headers=self._headers())
+                if resp.status_code == 200:
+                    ret[acc] = resp.json()
+                else:
+                    raise Exception(resp.text)
+        else:
+            resp = requests.get(ACCOUNTS, headers=self._headers())
+            if resp.status_code == 200:
+                for account in resp.json():
+                    ret[account['securitiesAccount']['accountId']] = account
+            else:
+                raise Exception(resp.text)
+        return ret
